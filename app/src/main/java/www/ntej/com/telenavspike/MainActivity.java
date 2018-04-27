@@ -12,6 +12,8 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Gravity;
+import android.widget.Toast;
 
 import com.telenav.mapkit.Annotation;
 import com.telenav.mapkit.MapService;
@@ -64,8 +66,13 @@ public class MainActivity extends AppCompatActivity {
                     // location-related task you need to do.
 
                 } else {
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
+                    MainActivity.this.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(MainActivity.this,R.string.noPermission,Toast.LENGTH_LONG).show();
+                        }
+                    });
+
                 }
             }
         }
@@ -87,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
             public void mapLoadStatusChanged(MapLoadStatus mapLoadStatus) {
 
                 switch (mapLoadStatus) {
-                    case Created:
+                    case Rendered:
 
                         ArrayList<Annotation> locationsArrayList = new ArrayList<>();
                         ArrayList<Annotation.AnnotationLayer> annotationLayersList = new ArrayList<>();
@@ -96,40 +103,54 @@ public class MainActivity extends AppCompatActivity {
 
                         //Car current location
                         LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-                        @SuppressLint("MissingPermission") Location myLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                        if(locationManager!=null) {
+                          //  @SuppressLint("MissingPermission") Location myLocation = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+                            Location myLocation = new Location("app");
+                            if (true) {
 
-                        myLocation.setLatitude(myLocation.getLatitude());
-                        myLocation.setLongitude(myLocation.getLongitude());
-                        Annotation currentLocationAnnotation = new Annotation(MainActivity.this, R.drawable.car, myLocation);
-                        currentLocationAnnotation.setType(Annotation.AnnotationType.Screen2D);
-                        currentLocationAnnotation.setLayer(Annotation.AnnotationLayer.Vehicle);
-                        locationsArrayList.add(currentLocationAnnotation);
+                                myLocation.setLatitude(42.319151);
+                                myLocation.setLongitude(-83.040021);
+                                Annotation currentLocationAnnotation = new Annotation(MainActivity.this, R.drawable.car, myLocation);
+                                currentLocationAnnotation.setType(Annotation.AnnotationType.LatLonToScreen2D);
+                                currentLocationAnnotation.setHorizontalAlignment(Gravity.CENTER);
+                                currentLocationAnnotation.setVerticalAlignment(Gravity.CENTER);
 
-                        //dealer0 current location
-                        Location dealerLocation0 = new Location("");
-                        dealerLocation0.setLatitude(42.345940);
-                        dealerLocation0.setLongitude(-83.072724);
-                        Annotation dealerAnnotation0 = new Annotation(MainActivity.this, R.drawable.pin, dealerLocation0);
-                        dealerAnnotation0.setType(Annotation.AnnotationType.Screen2D);
-                        dealerAnnotation0.setLayer(Annotation.AnnotationLayer.PoiLayer);
-                        locationsArrayList.add(dealerAnnotation0);
+                              //  currentLocationAnnotation.setLayer(Annotation.AnnotationLayer.PoiLayer);
+                                locationsArrayList.add(currentLocationAnnotation);
 
-                        //dealer1 current location
-                        Location dealerLocation1 = new Location("");
-                        dealerLocation1.setLatitude(42.348693);
-                        dealerLocation1.setLongitude(-83.013506);
-                        Annotation dealerAnnotation1 = new Annotation(MainActivity.this, R.drawable.pin2, dealerLocation1);
-                        dealerAnnotation1.setType(Annotation.AnnotationType.Screen2D);
-                        dealerAnnotation1.setLayer(Annotation.AnnotationLayer.PoiLayer);
-                        locationsArrayList.add(dealerAnnotation1);
+                                //dealer0 current location
+                                Location dealerLocation0 = new Location("app");
+                                dealerLocation0.setLatitude(42.345940);
+                                dealerLocation0.setLongitude(-83.072724);
+                                Annotation dealerAnnotation0 = new Annotation(MainActivity.this, R.drawable.pin, dealerLocation0);
+                                dealerAnnotation0.setType(Annotation.AnnotationType.LatLonToScreen2D);
+                                dealerAnnotation0.setHorizontalAlignment(Gravity.CENTER);
+                                dealerAnnotation0.setVerticalAlignment(Gravity.BOTTOM);
+                              //  dealerAnnotation0.setLayer(Annotation.AnnotationLayer.PoiLayer);
+                                locationsArrayList.add(dealerAnnotation0);
+
+                                //dealer1 current location
+                                Location dealerLocation1 = new Location("app");
+                                dealerLocation1.setLatitude(42.348693);
+                                dealerLocation1.setLongitude(-83.013506);
+                                Annotation dealerAnnotation1 = new Annotation(MainActivity.this, R.drawable.pin, dealerLocation1);
+                                dealerAnnotation1.setType(Annotation.AnnotationType.LatLonToScreen2D);
+                               // dealerAnnotation1.setLayer(Annotation.AnnotationLayer.PoiLayer);
+                                locationsArrayList.add(dealerAnnotation1);
 
 
-                        mapView.enableAnnotationLayers(annotationLayersList);
-                        mapView.addAnnotation(currentLocationAnnotation);
-                        mapView.addAnnotation(dealerAnnotation0);
-                        mapView.addAnnotation(dealerAnnotation1);
-                        mapView.setZoomLevel(mapView.calculateZoom(locationsArrayList, currentLocationAnnotation), false);
-                        mapView.lookAt(locationsArrayList);
+                               // mapView.enableAnnotationLayers(annotationLayersList);
+
+                                mapView.addAnnotation(currentLocationAnnotation);
+                                mapView.addAnnotation(dealerAnnotation0);
+                                mapView.addAnnotation(dealerAnnotation1);
+                                mapView.moveTo(myLocation);
+                                mapView.setZoomLevel(mapView.calculateZoom(locationsArrayList, currentLocationAnnotation), true);
+                               // mapView.lookAt(locationsArrayList);
+                            }
+                        }
+
+
 
                         break;
                 }
